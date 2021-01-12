@@ -19,25 +19,46 @@ from yolov3.yolov4 import Create_Yolo
 from yolov3.utils import detect_image
 from yolov3.configs import *
 
-gpus = tf.config.experimental.list_physical_devices('GPU')
+def recognize_gj(image_path, out_path):
+    gpus = tf.config.experimental.list_physical_devices('GPU')
 
-if len(gpus) > 0:
-    for k in range(len(gpus)):
-        tf.config.experimental.set_memory_growth(gpus[k], True)
-        #tf.config.experimental.
-        print('memory growth:', tf.config.experimental.get_memory_growth(gpus[k]))
-else:
-    print("Not enough GPU hardware devices available")
+    if len(gpus) > 0:
+        for k in range(len(gpus)):
+            tf.config.experimental.set_memory_growth(gpus[k], True)
+            #tf.config.experimental.
+            print('memory growth:', tf.config.experimental.get_memory_growth(gpus[k]))
+    else:
+        print("Not enough GPU hardware devices available")
 
-yolo = Create_Yolo(input_size=YOLO_INPUT_SIZE, CLASSES=TRAIN_CLASSES)
-yolo.load_weights(f"./checkpoints/{TRAIN_MODEL_NAME}") # use keras weights
+    yolo = Create_Yolo(input_size=YOLO_INPUT_SIZE, CLASSES=TRAIN_CLASSES)
+    yolo.load_weights(f"./checkpoints/{TRAIN_MODEL_NAME}") # use keras weights
 
-while True:
-    ID = random.randint(0, 25)
-    #label_txt = "mnist/mnist_test.txt"
-    #label_txt = "VOCdevkit/VOC2007/2007_test.txt"
-    label_txt = "gj/gj_val.txt"
-    image_info = open(label_txt).readlines()[ID].split()
-    image_path = image_info[0]    
-      #detect_image(yolo, image_path, "mnist_test.jpg", input_size=YOLO_INPUT_SIZE, show=True, CLASSES=TRAIN_CLASSES, rectangle_colors=(255,0,0))
-    detect_image(yolo, image_path, "voc_test.jpg", input_size=YOLO_INPUT_SIZE, show=True, CLASSES=TRAIN_CLASSES, rectangle_colors=(255,0,0))
+# while True:
+#     ID = random.randint(0, 25)
+#     #label_txt = "mnist/mnist_test.txt"
+#     #label_txt = "VOCdevkit/VOC2007/2007_test.txt"
+#     label_txt = "gj/gj_val.txt"
+#     image_info = open(label_txt).readlines()[ID].split()
+#     image_path = image_info[0]    
+#       #detect_image(yolo, image_path, "mnist_test.jpg", input_size=YOLO_INPUT_SIZE, show=True, CLASSES=TRAIN_CLASSES, rectangle_colors=(255,0,0))
+#     detect_image(yolo, image_path, "voc_test.jpg", input_size=YOLO_INPUT_SIZE, show=True, CLASSES=TRAIN_CLASSES, rectangle_colors=(255,0,0))
+
+# while True:
+# ID = random.randint(0, 25)
+#label_txt = "mnist/mnist_test.txt"
+#label_txt = "VOCdevkit/VOC2007/2007_test.txt"
+# label_txt = "gj/gj_val.txt"
+# image_info = open(label_txt).readlines()[ID].split()
+# image_path = image_info[0]
+    #detect_image(yolo, image_path, "mnist_test.jpg", input_size=YOLO_INPUT_SIZE, show=True, CLASSES=TRAIN_CLASSES, rectangle_colors=(255,0,0))
+
+
+    image = detect_image(yolo, image_path, out_path, input_size=YOLO_INPUT_SIZE, show=True, CLASSES=TRAIN_CLASSES, rectangle_colors=(255,0,0))
+    # Show the image
+    # cv2.namedWindow('predicted image', cv2.WINDOW_NORMAL)
+    # cv2.imshow("predicted image", image)
+    # Load and hold the image
+    # cv2.waitKey(0)
+    # To close the window after the required kill value was provided
+    # cv2.destroyAllWindows()
+    return image

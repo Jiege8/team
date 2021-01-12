@@ -14,10 +14,11 @@ import time
 import random
 import colorsys
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 from yolov3.configs import *
 from yolov3.yolov4 import *
 from tensorflow.python.saved_model import tag_constants
+from PIL import Image, ImageDraw, ImageFont
 
 def load_yolo_weights(model, weights_file):
     tf.keras.backend.clear_session() # used to reset layer names
@@ -124,7 +125,7 @@ def image_preprocess(image, target_size, gt_boxes=None):
         return image_paded, gt_boxes
 
 
-def draw_bbox(image, bboxes, CLASSES=YOLO_COCO_CLASSES, show_label=True, show_confidence = True, Text_colors=(255,255,0), rectangle_colors='', tracking=False):   
+def draw_bbox(image, bboxes, CLASSES=YOLO_COCO_CLASSES, show_label=False, show_confidence = True, Text_colors=(255,255,0), rectangle_colors='', tracking=False):
     NUM_CLASS = read_class_names(CLASSES)
     num_classes = len(NUM_CLASS)
     image_h, image_w, _ = image.shape
@@ -142,7 +143,7 @@ def draw_bbox(image, bboxes, CLASSES=YOLO_COCO_CLASSES, show_label=True, show_co
         score = bbox[4]
         class_ind = int(bbox[5])
         bbox_color = rectangle_colors if rectangle_colors != '' else colors[class_ind]
-        bbox_thick = int(0.6 * (image_h + image_w) / 1000)
+        bbox_thick = int(0.2 * (image_h + image_w) / 1000)
         if bbox_thick < 1: bbox_thick = 1
         fontScale = 0.75 * bbox_thick
         (x1, y1), (x2, y2) = (coor[0], coor[1]), (coor[2], coor[3])
@@ -172,7 +173,17 @@ def draw_bbox(image, bboxes, CLASSES=YOLO_COCO_CLASSES, show_label=True, show_co
             cv2.putText(image, label, (x1, y1-4), cv2.FONT_HERSHEY_COMPLEX_SMALL,
                         fontScale, Text_colors, bbox_thick, lineType=cv2.LINE_AA)
 
-    return image
+    # return image
+    if (isinstance(image, np.ndarray)):  # 判断是否OpenCV图片类型
+        image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+    draw = ImageDraw.Draw(image)
+    # 字体的格式
+    fontStyle = ImageFont.truetype("../font/simsun.ttc", size=150, encoding='unic')
+    # 绘制文本
+    draw.text(xy=(50, 25), text="检测数量: {}".format(len(bboxes)), fill=(255, 0, 0), font=fontStyle)
+    # 转换回OpenCV格式
+    return cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
 
 
 def bboxes_iou(boxes1, boxes2):
@@ -303,13 +314,14 @@ def detect_image(Yolo, image_path, output_path, input_size=416, show=False, CLAS
     # CreateXMLfile("XML_Detections", str(int(time.time())), original_image, bboxes, read_class_names(CLASSES))
 
     if output_path != '': cv2.imwrite(output_path, image)
-    if show:
+    # if show:
         # Show the image
-        cv2.imshow("predicted image", image)
+        # cv2.namedWindow('predicted image', cv2.WINDOW_NORMAL)
+        # cv2.imshow("predicted image", image)
         # Load and hold the image
-        cv2.waitKey(0)
+        # cv2.waitKey(0)
         # To close the window after the required kill value was provided
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()
         
     return image
 
